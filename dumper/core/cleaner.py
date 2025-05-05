@@ -1,16 +1,15 @@
 import re
 
-def clean_lua_code(lua_code):
-    """Cleans Lua code by removing comments and unnecessary junk."""
+def clean_lua_code(code: str) -> str:
+    """Remove comments and junk like @# from the Lua code."""
     
-    # Remove comments
-    lua_code = re.sub(r'--.*', '', lua_code)
-    lua_code = re.sub(r'\[\[.*?\]\]', '', lua_code, flags=re.DOTALL)
+    # Remove comments (single-line and multi-line)
+    code = re.sub(r'--.*', '', code)  # Remove single-line comments
+    code = re.sub(r'--\[\[.*?\]\]--', '', code, flags=re.DOTALL)  # Remove multi-line comments
     
-    # Remove @# junk
-    lua_code = re.sub(r'@#.*', '', lua_code)
+    # Remove any junk like @#
+    code = re.sub(r'@#.*', '', code)
     
-    # Clean extra whitespace
-    lua_code = '\n'.join([line.strip() for line in lua_code.splitlines() if line.strip()])
-
-    return lua_code
+    # Optionally, you can add more cleaning here (spacing, blank lines, etc.)
+    
+    return code
