@@ -1,51 +1,44 @@
-import os
-from dotenv import load_dotenv
 import discord
+import os
 from discord.ext import commands
+from dotenv import load_dotenv
+from dumper.github.fetcher import fetch_lua_file
+from dumper.core.runner import run_lua_in_vm
 from dumper.core.cleaner import clean_lua_code
-from dumper.github.fetcher import fetch_lua_from_github
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
-TOKEN = os.getenv("DISCORD_TOKEN")
-PREFIX = os.getenv("COMMAND_PREFIX", "!")
-OWNER_ID = int(os.getenv("OWNER_ID", 123456789012345678))
+# Initialize the bot
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Bot setup
-bot = commands.Bot(command_prefix=PREFIX, intents=discord.Intents.all())
-
-@bot.event
-async def on_ready():
-    print(f"🤖 Logged in as {bot.user} (ID: {bot.user.id})")
-
-@bot.command()
-async def dump(ctx):
-    """This command starts the dumper. It will clean and process Lua files."""
+# Process the Lua code
+@bot.command(name="dump")
+async def dump(ctx, url: str):
+    """Command to fetch, clean, and process Lua code from a URL."""
     
-    # Inform the user to upload a Lua file
-    await ctx.send("🧠 Dumper is online! Please upload a `.lua` file to clean and analyze.")
+    # Send a message to indicate that the bot is processing
+    await ctx.send("🔄 Processing Lua code... Please wait.")
 
-    # Wait for the user to upload a .lua file
-    message = await bot.wait_for('message', check=lambda m: m.author == ctx.author and m.attachments)
-    
-    # Check if the attachment is a Lua file
-    if message.attachments:
-        file = message.attachments[0]
+    try:
+        # Fetch Lua code from GitHub raw URL
+        lua_code = fetch_lua_file(url)
         
-        # Ensure the file is a Lua file
-        if file.filename.endswith(".lua"):
-            lua_code = await file.read()
-
-            # Clean the Lua code (remove comments, junk, etc.)
-            cleaned_code = clean_lua_code(lua_code.decode())
-
-            # Send the cleaned Lua code back to the user
-            await ctx.send(f"Cleaned Lua Code:\n```lua\n{cleaned_code}\n```")
-        else:
-            await ctx.send("❌ Please upload a `.lua` file.")
-    else:
-        await ctx.send("❌ No file uploaded. Please try again and upload a `.lua` file.")
+        # Clean the Lua code (removes comments and junk)
+        cleaned_code = clean_lua_code(lua_code)
+        
+        # Execute the cleaned Lua code in the VM and get the output
+        result = run_lua_in_vm(cleaned_code)
+        
+        # Send the cleaned code or output
+        await ctx.send(f"✅ Processed Lua code:\n```lua\n{result}\n```")
+        
+    except Exception as e:
+        # If any error occurs, send the error message
+        await ctx.send(f"❌ An error occurred: {str(e)}")
 
 # Start the bot
-bot.run(TOKEN)
+bot.run(DISCORD_TOKEN)
