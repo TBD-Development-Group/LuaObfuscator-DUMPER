@@ -1,15 +1,35 @@
 import re
 
 def clean_lua_code(code: str) -> str:
-    """Remove comments and junk like @# from the Lua code."""
-    
-    # Remove comments (single-line and multi-line)
-    code = re.sub(r'--.*', '', code)  # Remove single-line comments
-    code = re.sub(r'--\[\[.*?\]\]--', '', code, flags=re.DOTALL)  # Remove multi-line comments
-    
-    # Remove any junk like @#
-    code = re.sub(r'@#.*', '', code)
-    
-    # Optionally, you can add more cleaning here (spacing, blank lines, etc.)
-    
-    return code
+    lines = code.split('\n')
+    result = []
+    stack = []  # function nesting stack
+    buffer = []
+
+    for line in lines:
+        trimmed = line.strip()
+
+        # Start of a function
+        if trimmed.startswith("local function"):
+            uses_v16 = "v16" in line
+            indent = re.match(r"^\s*", line).group(0)
+            stack.append({'uses_v16': uses_v16, 'indent': indent})
+            buffer.append(line)
+
+        # Inside a function
+        elif stack:
+            buffer.append(line)
+            if "v16" in line:
+                stack[-1]['uses_v16'] = True
+            if trimmed == "end":
+                current = stack.pop()
+                result.extend(buffer)
+                buffer = []
+                if current['uses_v16']:
+                    result.append(current['indent'] + "print(v16)")
+
+        # Outside function
+        else:
+            result.append(line)
+
+    return '\n'.join(result)
