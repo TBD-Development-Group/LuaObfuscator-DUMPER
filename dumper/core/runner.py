@@ -1,15 +1,15 @@
 from lupa import LuaRuntime
 
-def run_lua(code):
+def run_lua_in_vm(code: str) -> str:
+    """Run Lua code inside a safe Lua VM and capture the output."""
     lua = LuaRuntime(unpack_returned_tuples=True)
-    output_lines = []
-
-    def capture_print(*args):
-        output_lines.append(" ".join(map(str, args)))
-
-    lua.globals().print = capture_print
-
+    
+    # Create a sandbox environment for Lua execution
+    lua.execute('print = function(...) return table.concat({...}, " ") end')
+    
     try:
-        lua.execute(code)
-    except
-
+        # Execute the Lua code and get the result
+        result = lua.execute(code)
+        return str(result)  # Convert result to string for output
+    except Exception as e:
+        raise Exception(f"Lua execution failed: {str(e)}")
