@@ -1,6 +1,14 @@
-def log_info(msg):
-    print(f"\033[96m[INFO]\033[0m {msg}")
+import logging
 
-def log_error(msg):
-    print(f"\033[91m[ERROR]\033[0m {msg}")
+def setup_logger():
+    """Sets up a logger for the bot with colored output."""
+    logger = logging.getLogger('lua_dumper')
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    
+    return logger
 
+logger = setup_logger()
