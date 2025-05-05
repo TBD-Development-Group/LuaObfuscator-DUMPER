@@ -1,24 +1,23 @@
-from dumper.github.fetcher import fetch_lua_from_url
-from dumper.core.cleaner import clean_lua_code
-from dumper.core.runner import run_lua
-from dumper.utils.logger import log_info, log_error
+import os
+from dotenv import load_dotenv
+import discord
+from discord.ext import commands
 
-def main():
-    try:
-        url = input("🔗 Enter raw GitHub .lua URL: ").strip()
-        log_info("Fetching Lua code...")
-        raw_code = fetch_lua_from_url(url)
+load_dotenv()
 
-        log_info("Cleaning code...")
-        cleaned_code = clean_lua_code(raw_code)
+TOKEN = os.getenv("DISCORD_TOKEN")
+PREFIX = os.getenv("COMMAND_PREFIX", "!")
 
-        log_info("Running Lua code safely...")
-        output = run_lua(cleaned_code)
+bot = commands.Bot(command_prefix=PREFIX, intents=discord.Intents.all())
 
-        print("\n🟩 Output:\n" + output)
-    except Exception as e:
-        log_error(str(e))
+@bot.event
+async def on_ready():
+    print(f"🤖 Logged in as {bot.user} (ID: {bot.user.id})")
 
-if __name__ == "__main__":
-    main()
+@bot.command()
+async def dump(ctx):
+    await ctx.send("🧠 Dumper is online! Send a .lua file to analyze.")
 
+# Add more command logic here...
+
+bot.run(TOKEN)
