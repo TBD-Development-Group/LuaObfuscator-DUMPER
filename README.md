@@ -1,15 +1,12 @@
 # Lua Dumper Bot
 
-A GitHub bot for downloading, cleaning, and executing Lua code safely inside a Python environment using `lupa`.
+## Description
 
-## 🔧 Features
-- Fetch `.lua` files from GitHub URLs
-- Remove junk like `@#`, empty lines, comments
-- Run Lua code safely in a sandboxed VM
-- Optional: Extract function names
+This bot processes and cleans Lua files. It can be used to remove junk, comments, and obfuscation from Lua code by using the `!dump` command.
 
-## 🚀 Setup
-```bash
-pip install -r requirements.txt
-python bot.py
+## Setup
 
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/lua-dumper-bot.git
+   cd lua-dumper-bot
