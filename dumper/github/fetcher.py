@@ -1,12 +1,9 @@
 import requests
 
-def fetch_lua_from_url(url):
-    if not url.endswith(".lua"):
-        raise ValueError("URL must end with .lua")
-    try:
-        r = requests.get(url)
-        r.raise_for_status()
-        return r.text
-    except requests.RequestException as e:
-        raise RuntimeError(f"Failed to fetch Lua file: {e}")
-
+def fetch_lua_from_github(url):
+    """Fetch Lua code from a raw GitHub URL."""
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None
