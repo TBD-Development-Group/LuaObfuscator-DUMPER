@@ -1,13 +1,16 @@
 import re
 
-def clean_lua_code(code):
-    cleaned_lines = []
-    for line in code.splitlines():
-        line = line.strip()
-        if not line or line.startswith("--") or "@#" in line:
-            continue
-        # Remove common obfuscation chars
-        line = re.sub(r'[@#]', '', line)
-        cleaned_lines.append(line)
-    return "\n".join(cleaned_lines)
+def clean_lua_code(lua_code):
+    """Cleans Lua code by removing comments and unnecessary junk."""
+    
+    # Remove comments
+    lua_code = re.sub(r'--.*', '', lua_code)
+    lua_code = re.sub(r'\[\[.*?\]\]', '', lua_code, flags=re.DOTALL)
+    
+    # Remove @# junk
+    lua_code = re.sub(r'@#.*', '', lua_code)
+    
+    # Clean extra whitespace
+    lua_code = '\n'.join([line.strip() for line in lua_code.splitlines() if line.strip()])
 
+    return lua_code
